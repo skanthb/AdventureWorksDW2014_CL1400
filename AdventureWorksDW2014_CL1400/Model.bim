@@ -909,7 +909,8 @@
           {
             "name": "CalendarYear",
             "dataType": "int64",
-            "sourceColumn": "CalendarYear"
+            "sourceColumn": "CalendarYear",
+            "summarizeBy": "none"
           },
           {
             "name": "CalendarSemester",
