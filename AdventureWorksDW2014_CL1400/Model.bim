@@ -23,6 +23,29 @@
           "Username": "sa",
           "EncryptConnection": false
         }
+      },
+      {
+        "type": "structured",
+        "name": "File/C:\\Users\\sri\\Documents\\SQL Server Management Studio\\SampleEmployee xlsx",
+        "connectionDetails": {
+          "protocol": "file",
+          "address": {
+            "path": "C:\\Users\\sri\\Documents\\SQL Server Management Studio\\SampleEmployee.xlsx"
+          },
+          "authentication": null,
+          "query": null
+        },
+        "credential": {
+          "AuthenticationKind": "ServiceAccount",
+          "kind": "File",
+          "path": "c:\\users\\sri\\documents\\sql server management studio\\sampleemployee.xlsx"
+        },
+        "contextExpression": [
+          "let",
+          "    #\"0001\" = Excel.Workbook(..., null, true)",
+          "in",
+          "    #\"0001\""
+        ]
       }
     ],
     "tables": [
@@ -521,7 +544,7 @@
             "sourceColumn": "CurrencyKey"
           },
           {
-            "name": "SalesTerritoryKey",
+            "name": "SalesTerritoryId",
             "dataType": "int64",
             "sourceColumn": "SalesTerritoryKey"
           },
@@ -1058,6 +1081,97 @@
             ]
           }
         ]
+      },
+      {
+        "name": "DimSalesTerritory",
+        "columns": [
+          {
+            "name": "SalesTerritoryId",
+            "dataType": "int64",
+            "sourceColumn": "SalesTerritoryKey"
+          },
+          {
+            "name": "SalesTerritoryRegion",
+            "dataType": "string",
+            "sourceColumn": "SalesTerritoryRegion"
+          },
+          {
+            "name": "SalesTerritoryCountry",
+            "dataType": "string",
+            "sourceColumn": "SalesTerritoryCountry"
+          },
+          {
+            "name": "SalesTerritoryGroup",
+            "dataType": "string",
+            "sourceColumn": "SalesTerritoryGroup"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Partition",
+            "dataView": "full",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = #\"SQL/192 168 0 10;AdventureWorksDW2014\",",
+                "    dbo_DimSalesTerritory = Source{[Schema=\"dbo\",Item=\"DimSalesTerritory\"]}[Data],",
+                "    #\"Removed Columns\" = Table.RemoveColumns(dbo_DimSalesTerritory,{\"SalesTerritoryAlternateKey\"})",
+                "in",
+                "    #\"Removed Columns\""
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "SampleEmployee",
+        "isHidden": true,
+        "columns": [
+          {
+            "name": "EmployeeId",
+            "dataType": "string",
+            "sourceColumn": "EmployeeId"
+          },
+          {
+            "name": "SalesTerritoryId",
+            "dataType": "int64",
+            "sourceColumn": "SalesTerritoryId"
+          },
+          {
+            "name": "FirstName",
+            "dataType": "string",
+            "sourceColumn": "FirstName"
+          },
+          {
+            "name": "LastName",
+            "dataType": "string",
+            "sourceColumn": "LastName"
+          },
+          {
+            "name": "LoginId",
+            "dataType": "string",
+            "sourceColumn": "LoginId"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Partition",
+            "dataView": "full",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = #\"SQL/192 168 0 10;AdventureWorksDW2014\",",
+                "    dbo_SampleEmployee = Source{[Schema=\"dbo\",Item=\"SampleEmployee\"]}[Data],",
+                "    #\"Removed Columns\" = Table.RemoveColumns(dbo_SampleEmployee,{\"Column 5\", \"Column 6\", \"Column 7\", \"Column 8\", \"Column 9\"}),",
+                "    #\"Changed Type\" = Table.TransformColumnTypes(#\"Removed Columns\",{{\"SalesTerritoryId\", Int64.Type}})",
+                "in",
+                "    #\"Changed Type\""
+              ]
+            }
+          }
+        ]
       }
     ],
     "relationships": [
@@ -1118,6 +1232,66 @@
         "toTable": "DimDate",
         "toColumn": "Date",
         "isActive": false
+      },
+      {
+        "name": "0c82daf5-3a1e-499f-a491-60288e67b855",
+        "fromTable": "DimGeography",
+        "fromColumn": "SalesTerritoryKey",
+        "toTable": "DimSalesTerritory",
+        "toColumn": "SalesTerritoryId"
+      },
+      {
+        "name": "ef7272d8-8fa5-418a-9e77-2e4163bf2bd4",
+        "fromTable": "FactInternetSales",
+        "fromColumn": "SalesTerritoryId",
+        "toTable": "DimSalesTerritory",
+        "toColumn": "SalesTerritoryId",
+        "isActive": false
+      }
+    ],
+    "roles": [
+      {
+        "name": "Sales Employees by Territory",
+        "modelPermission": "read",
+        "members": [
+          {
+            "memberName": "testuser1",
+            "memberId": "S-1-5-21-2641039258-1635949397-421555053-1008"
+          },
+          {
+            "memberName": "testuser2",
+            "memberId": "S-1-5-21-2641039258-1635949397-421555053-1009"
+          },
+          {
+            "memberName": "testuser3",
+            "memberId": "S-1-5-21-2641039258-1635949397-421555053-1010"
+          },
+          {
+            "memberName": "testuser4",
+            "memberId": "S-1-5-21-2641039258-1635949397-421555053-1011"
+          },
+          {
+            "memberName": "sri",
+            "memberId": "S-1-5-21-2641039258-1635949397-421555053-1001"
+          }
+        ],
+        "tablePermissions": [
+          {
+            "name": "DimSalesTerritory",
+            "filterExpression": [
+              "DimSalesTerritory[SalesTerritoryId]",
+              "    = LOOKUPVALUE (",
+              "        SampleEmployee[SalesTerritoryId],",
+              "        SampleEmployee[LoginId], USERNAME(),",
+              "        SampleEmployee[SalesTerritoryId], DimSalesTerritory[SalesTerritoryId]",
+              "    )"
+            ]
+          },
+          {
+            "name": "SampleEmployee",
+            "filterExpression": "FALSE()"
+          }
+        ]
       }
     ],
     "annotations": [
