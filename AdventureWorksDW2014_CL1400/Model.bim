@@ -1197,13 +1197,6 @@
         "toColumn": "ProductSubcategoryKey"
       },
       {
-        "name": "7648280d-d869-4f13-aa80-95631a5b0cd4",
-        "fromTable": "FactInternetSales",
-        "fromColumn": "ProductKey",
-        "toTable": "DimProduct",
-        "toColumn": "ProductKey"
-      },
-      {
         "name": "90dff16f-f731-4a45-8f46-b238df63b95f",
         "fromTable": "DimProductSubcategory",
         "fromColumn": "ProductCategoryKey",
@@ -1247,6 +1240,14 @@
         "toTable": "DimSalesTerritory",
         "toColumn": "SalesTerritoryId",
         "isActive": false
+      },
+      {
+        "name": "759ce4f0-a3e4-433b-acbf-8282d7082543",
+        "fromTable": "FactInternetSales",
+        "fromColumn": "ProductKey",
+        "toTable": "DimProduct",
+        "toColumn": "ProductKey",
+        "crossFilteringBehavior": "bothDirections"
       }
     ],
     "roles": [
